@@ -20,17 +20,20 @@ export const useHandleApi = () => {
   });
 };
 
-export const createUser = async (title: string, desc: string): Promise<Post> => {
+export const createItem = async (title: string, desc: string): Promise<Post> => {
+  console.log('create press');
   const response = await axios.post(baseUrl, { title, description: desc });
   return response.data;
 };
 
-export const updateUser = async (title: string, desc: string, id: number): Promise<Post> => {
+export const updateItem = async (title: string, desc: string, id: number): Promise<Post> => {
+  console.log('update press');
+
   const response = await axios.put(`${baseUrl}/${id}`, { title, description: desc });
   return response.data;
 };
 
-export const deleteUser = async (id: number): Promise<Post> => {
+export const deleteItem = async (id: number): Promise<Post> => {
   console.log('delete press');
   
   const response = await axios.delete(`${baseUrl}/${id}`);

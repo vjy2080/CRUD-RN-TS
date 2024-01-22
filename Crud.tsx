@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, FlatList, RefreshControl } from 'react-native';
-import { useHandleApi, createUser, updateUser, deleteUser } from './ReactQuery';
+import { useHandleApi, createItem, updateItem, deleteItem } from './ReactQuery';
 import { useMutation } from '@tanstack/react-query';
 
 interface Item {
@@ -12,55 +12,59 @@ interface Item {
 const CrudExample: React.FC = () => {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
-  const [isUpdate, setIsUpdate] = useState(false);
   const [updateId, setUpdateId] = useState<number | null>(null);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
   const [refreshing, setRefreshing] = React.useState(false);
   const { data, refetch } = useHandleApi();
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     refetch()
-    setTimeout(() => {
+    reset()
+    // setTimeout(() => {
       setRefreshing(false);
-    }, 2000);
+    // }, 2000);
   }, []);
-  const mutation = useMutation({
-    // mutationKey:['delete']
-    mutationFn: () =>
-      deleteId ? deleteUser(deleteId) : isUpdate ? updateUser(title, desc, updateId!) : createUser(title, desc),
-    onSuccess: () => {
-      refetch();
-      setTitle('');
-      setDesc('');
-      setIsUpdate(false);
-      setDeleteId(null);
-      setUpdateId(null);
-    },
+
+  const reset = () => {
+    console.log('reset');
+    refetch();
+    setTitle('');
+    setDesc('');
+    setUpdateId(null);
+  }
+  const create = useMutation({
+    mutationFn: () => createItem(title, desc),
+    onSuccess: () => reset(),
+  });
+  const update = useMutation({
+    mutationFn: () => updateItem(title, desc, updateId!),
+    onSuccess: () => reset(),
+  });
+  const deleteData = useMutation({
+    mutationFn: (id: number) => deleteItem(id),
+    onSuccess: () => reset(),
   });
 
   const addHandle = () => {
     if (title && desc) {
-      mutation.mutate();
+      create.mutate();
     } else {
       console.error('Please fill required field');
     }
   };
 
-  const updateHandle = (id: number) => {
+  const editHandle = (id: number) => {
     const selectedItem = data?.find((item: Item) => item.id === id);
     if (selectedItem) {
       setTitle(selectedItem.title);
       setDesc(selectedItem.description);
       setUpdateId(id);
-      setIsUpdate(true);
       console.log(id);
-
     }
   };
 
-  const updateDataHandle = () => {
+  const updateHandle = () => {
     if (title && desc) {
-      mutation.mutate();
+      update.mutate();
     } else {
       console.error('Please fill required field');
     }
@@ -68,9 +72,7 @@ const CrudExample: React.FC = () => {
 
   const deleteHandle = (id: number) => {
     if (id) {
-      console.log(id);
-      setDeleteId(id);
-      mutation.mutate();
+      deleteData.mutate(id);
     } else {
       console.error('Something went wrong');
     }
@@ -92,7 +94,7 @@ const CrudExample: React.FC = () => {
       </View>
       <View style={{ flex: 1 / 4 }}>
         <View style={{ marginBottom: 3 }}>
-          <Button title="Edit" onPress={() => updateHandle(item.id)} />
+          <Button title="Edit" onPress={() => editHandle(item.id)} />
         </View>
         <Button title="Delete" color={'#F75D59'} onPress={() => deleteHandle(item.id)} />
       </View>
@@ -118,8 +120,8 @@ const CrudExample: React.FC = () => {
         <View style={{ marginStart: 2 }}>
           <Button
             color={'green'}
-            title={isUpdate ? 'Update' : 'Add'}
-            onPress={() => (isUpdate ? updateDataHandle() : addHandle())}
+            title={updateId ? 'Update' : 'Create'}
+            onPress={() => (updateId ? updateHandle() : addHandle())}
           />
         </View>
       </View>
