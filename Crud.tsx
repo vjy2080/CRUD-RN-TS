@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, RefreshControl } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, RefreshControl, Pressable } from 'react-native';
 import { useHandleApi, createItem, updateItem, deleteItem } from './ReactQuery';
 import { useMutation } from '@tanstack/react-query';
+import { styles } from './style';
+import { MaterialIcons } from '@expo/vector-icons';
 
 interface Item {
   id: number;
@@ -19,9 +21,7 @@ const CrudExample: React.FC = () => {
     setRefreshing(true);
     refetch()
     reset()
-    // setTimeout(() => {
-      setRefreshing(false);
-    // }, 2000);
+    setRefreshing(false);
   }, []);
 
   const reset = () => {
@@ -33,7 +33,9 @@ const CrudExample: React.FC = () => {
   }
   const create = useMutation({
     mutationFn: () => createItem(title, desc),
-    onSuccess: () => reset(),
+    onSuccess: () => {
+      reset();
+    }
   });
   const update = useMutation({
     mutationFn: () => updateItem(title, desc, updateId!),
@@ -80,49 +82,72 @@ const CrudExample: React.FC = () => {
 
   const renderItem = ({ item }: any) => (
     <View
-      style={{ flexDirection: 'row', backgroundColor: '#d3d3d3', alignSelf: 'center', margin: 3, borderRadius: 3, padding: 5 }}
+      style={styles.card}
     >
-      <View style={{ flex: 4 / 4 }}>
+      <View style={styles.inputBlock}>
+        <Text style={styles.headerText}>Title:</Text>
         <Text
-          style={{ paddingHorizontal: 5, marginHorizontal: 5 }}
+          style={styles.cardText}
+        >{item.title}</Text>
+        <Text style={styles.headerText}>Desc:</Text>
 
-        >Title:{item.title}</Text>
         <Text
-          style={{ paddingHorizontal: 5, marginHorizontal: 5 }}
+          style={styles.cardText}
 
-        >Desc:{item.description}</Text>
+        >{item.description}</Text>
       </View>
-      <View style={{ flex: 1 / 4 }}>
-        <View style={{ marginBottom: 3 }}>
-          <Button title="Edit" onPress={() => editHandle(item.id)} />
+      <View style={styles.buttonContainer}>
+        <View style={{ marginBottom: 10, backgroundColor: 'blue',borderRadius:10 }}>
+          <Pressable
+            onPress={() => editHandle(item.id)}
+          >
+            <MaterialIcons name="edit-note" size={40} color="white" />
+          </Pressable>
         </View>
-        <Button title="Delete" color={'#F75D59'} onPress={() => deleteHandle(item.id)} />
+        <View style={{ backgroundColor: '#F75D59',borderRadius:10 }}>
+          <Pressable
+           onPress={() => deleteHandle(item.id)}
+          >
+            <MaterialIcons name="delete-outline" size={40} color="white" />
+          </Pressable>
+        </View>
       </View>
     </View>
   );
 
   return (
-    <View style={{ flex: 1, padding: 16, width: '100%' }}>
-      <View style={{ flexDirection: 'row', marginBottom: 10, backgroundColor: '#ADD8E6', padding: 10, borderRadius: 5 }}>
+    <View style={styles.inputContainer}>
+      <View style={styles.inputs}>
         <TextInput
-          style={{ borderWidth: 1, borderColor: 'black', paddingHorizontal: 5, marginHorizontal: 5, borderRadius: 5 }}
+          style={styles.titleInput}
           autoFocus
+          maxLength={15}
           placeholder="Add title here"
           value={title}
           onChangeText={(text) => setTitle(text)}
         />
         <TextInput
-          style={{ borderWidth: 1, borderColor: 'black', paddingHorizontal: 5, marginHorizontal: 5, borderRadius: 5 }}
+          style={styles.descInput}
           placeholder="Add description here"
+          maxLength={65}
           value={desc}
           onChangeText={(text) => setDesc(text)}
         />
         <View style={{ marginStart: 2 }}>
-          <Button
+          {/* <Button
             color={'green'}
             title={updateId ? 'Update' : 'Create'}
-            onPress={() => (updateId ? updateHandle() : addHandle())}
-          />
+            onPress={() => }
+          /> */}
+          <View style={styles.btn}>
+            {
+              <Pressable
+                onPress={() => (updateId ? updateHandle() : addHandle())}
+              >
+                <MaterialIcons name={updateId ? 'format-list-bulleted-add' : 'add'} size={24} color="white" />
+              </Pressable>
+            }
+          </View>
         </View>
       </View>
       <FlatList
