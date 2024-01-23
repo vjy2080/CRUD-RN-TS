@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, RefreshControl, Pressable } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, RefreshControl, Pressable, Modal, Alert } from 'react-native';
 import { useHandleApi, createItem, updateItem, deleteItem } from './ReactQuery';
 import { useMutation } from '@tanstack/react-query';
 import { styles } from './style';
@@ -16,6 +16,7 @@ const CrudExample: React.FC = () => {
   const [desc, setDesc] = useState('');
   const [updateId, setUpdateId] = useState<number | null>(null);
   const [refreshing, setRefreshing] = React.useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const { data, refetch } = useHandleApi();
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -35,11 +36,15 @@ const CrudExample: React.FC = () => {
     mutationFn: () => createItem(title, desc),
     onSuccess: () => {
       reset();
+      setModalVisible(false);
     }
   });
   const update = useMutation({
     mutationFn: () => updateItem(title, desc, updateId!),
-    onSuccess: () => reset(),
+    onSuccess: () => {
+      reset();
+      setModalVisible(false);
+    }
   });
   const deleteData = useMutation({
     mutationFn: (id: number) => deleteItem(id),
@@ -47,6 +52,7 @@ const CrudExample: React.FC = () => {
   });
 
   const addHandle = () => {
+    setModalVisible(true);
     if (title && desc) {
       create.mutate();
     } else {
@@ -60,6 +66,7 @@ const CrudExample: React.FC = () => {
       setTitle(selectedItem.title);
       setDesc(selectedItem.description);
       setUpdateId(id);
+      setModalVisible(true);
       console.log(id);
     }
   };
@@ -97,16 +104,16 @@ const CrudExample: React.FC = () => {
         >{item.description}</Text>
       </View>
       <View style={styles.buttonContainer}>
-        <View style={{ marginBottom: 10, backgroundColor: 'blue',borderRadius:10 }}>
+        <View style={{ marginBottom: 10, backgroundColor: 'blue', borderRadius: 10 }}>
           <Pressable
             onPress={() => editHandle(item.id)}
           >
             <MaterialIcons name="edit-note" size={40} color="white" />
           </Pressable>
         </View>
-        <View style={{ backgroundColor: '#F75D59',borderRadius:10 }}>
+        <View style={{ backgroundColor: '#F75D59', borderRadius: 10 }}>
           <Pressable
-           onPress={() => deleteHandle(item.id)}
+            onPress={() => deleteHandle(item.id)}
           >
             <MaterialIcons name="delete-outline" size={40} color="white" />
           </Pressable>
@@ -116,51 +123,86 @@ const CrudExample: React.FC = () => {
   );
 
   return (
-    <View style={styles.inputContainer}>
-      <View style={styles.inputs}>
-        <TextInput
-          style={styles.titleInput}
-          autoFocus
-          maxLength={15}
-          placeholder="Add title here"
-          value={title}
-          onChangeText={(text) => setTitle(text)}
-        />
-        <TextInput
-          style={styles.descInput}
-          placeholder="Add description here"
-          maxLength={65}
-          value={desc}
-          onChangeText={(text) => setDesc(text)}
-        />
-        <View style={{ marginStart: 2 }}>
-          {/* <Button
-            color={'green'}
-            title={updateId ? 'Update' : 'Create'}
-            onPress={() => }
-          /> */}
-          <View style={styles.btn}>
-            {
-              <Pressable
-                onPress={() => (updateId ? updateHandle() : addHandle())}
-              >
-                <MaterialIcons name={updateId ? 'format-list-bulleted-add' : 'add'} size={24} color="white" />
-              </Pressable>
-            }
+    <>
+      <View style={styles.inputContainer}>
+        <View style={styles.startButton}>
+          {/* <Button title='Update' onPress={() => setModalVisible(true)} /> */}
+          <Text style={{ color: 'brown', fontSize: 30, textAlign: 'center',marginStart:15 }}>TODO List</Text>
+          <View
+            style={styles.startbtn}
+          >
+            <Pressable
+              onPress={() => setModalVisible(true)}
+            >
+              <MaterialIcons name='add' size={35} color="white" />
+            </Pressable>
           </View>
         </View>
+        <FlatList
+          style={{ height: '100%' }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          data={data}
+          keyExtractor={(item: any) => item?.id}
+          renderItem={renderItem}
+          ListEmptyComponent={
+            <View style={styles.centeredView}>
+              <Text style={{ marginTop: 50, fontSize: 30, color: 'red' }}>The list is empty</Text>
+              <Text style={{ marginTop: 20, fontSize: 20, color: 'blue' }}>Try to add Something</Text>
+            </View>
+          }
+        />
+        <View style={styles.centeredView}>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+          // onRequestClose={() => {
+          //   setModalVisible(!modalVisible);
+          // }}
+          >
+            <View style={styles.internalView}>
+              <View style={styles.modalView}>
+                {/* <View style={styles.inputs}> */}
+                <TextInput
+                  style={styles.titleInput}
+                  autoFocus
+                  maxLength={15}
+                  placeholder="Add title here"
+                  value={title}
+                  onChangeText={(text) => setTitle(text)}
+                />
+                <TextInput
+                  multiline={true}
+                  numberOfLines={4}
+                  style={styles.descInput}
+                  placeholder="Add description here"
+                  maxLength={65}
+                  value={desc}
+                  onChangeText={(text) => setDesc(text)}
+                />
+                <View style={{ alignItems: 'flex-end', flexDirection: 'row-reverse' }}>
+                  <View style={{ marginHorizontal: 5 }}>
+                    <Button title='Close' color={'red'} onPress={() => { setModalVisible(false); reset() }} />
+                  </View>
+                  <Pressable
+                  >
+                    <Text></Text>
+                    <Button
+                      onPress={() => (updateId ? updateHandle() : addHandle())}
+                      color={'green'}
+                      title={updateId ? 'Update' : 'Add'} />
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        </View>
+
       </View>
-      <FlatList
-        style={{ flex: 1 }}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        data={data}
-        keyExtractor={(item: any) => item?.id}
-        renderItem={renderItem}
-      />
-    </View>
+    </>
   );
 };
 
