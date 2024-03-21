@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, FlatList, RefreshControl, Pressable, Modal, Alert } from 'react-native';
 import { useHandleApi, createItem, updateItem, deleteItem } from './ReactQuery';
 import { useMutation } from '@tanstack/react-query';
 import { styles } from './style';
 import { MaterialIcons } from '@expo/vector-icons';
+import { onlineManager } from "@tanstack/react-query";
+
 
 interface Item {
   id: number;
@@ -17,6 +19,8 @@ const CrudExample: React.FC = () => {
   const [updateId, setUpdateId] = useState<number | null>(null);
   const [refreshing, setRefreshing] = React.useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [isOnline, setIsOnline] = useState(onlineManager.isOnline());
+
   const { data, refetch } = useHandleApi();
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -24,6 +28,13 @@ const CrudExample: React.FC = () => {
     reset()
     setRefreshing(false);
   }, []);
+
+
+useEffect(() => {
+  return () => {
+    refetch()
+  };
+}, []);
 
   const reset = () => {
     console.log('reset');
@@ -128,6 +139,26 @@ const CrudExample: React.FC = () => {
         <View style={styles.startButton}>
           {/* <Button title='Update' onPress={() => setModalVisible(true)} /> */}
           <Text style={{ color: 'brown', fontSize: 30, textAlign: 'center',marginStart:15 }}>TODO List</Text>
+          <View>
+            <Pressable
+            onPress={()=>{
+              onlineManager.setOnline(true);
+            setIsOnline(onlineManager.isOnline());
+            }}
+            >
+              <MaterialIcons name='wifi' size={35} color="blue"/>
+            </Pressable>
+          </View>
+          <View>
+            <Pressable
+            onPress={()=>{
+              onlineManager.setOnline(false);
+            setIsOnline(onlineManager.isOnline());
+            }}
+            >
+              <MaterialIcons name='wifi-off' size={35} color="red"/>
+            </Pressable>
+          </View>
           <View
             style={styles.startbtn}
           >
@@ -137,6 +168,10 @@ const CrudExample: React.FC = () => {
               <MaterialIcons name='add' size={35} color="white" />
             </Pressable>
           </View>
+          
+        </View>
+        <View>
+        <Text style={styles.status}>Internet Status: {isOnline ? "ONLINE" : "OFFLINE"}</Text>
         </View>
         <FlatList
           style={{ height: '100%' }}

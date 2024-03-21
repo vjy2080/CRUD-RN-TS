@@ -117,5 +117,11 @@ export const styles = StyleSheet.create({
         backgroundColor: 'green',
         padding: 5,
         borderRadius: 50,
+    },
+    status:{
+        textAlign:'right',
+        marginRight:10,
+        color:'grey'
     }
+
 })
