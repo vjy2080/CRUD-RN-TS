@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, FlatList, RefreshControl, Pressable, Modal, Alert } from 'react-native';
 import { useHandleApi, createItem, updateItem, deleteItem } from './ReactQuery';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { styles } from './style';
 import { MaterialIcons } from '@expo/vector-icons';
 import { onlineManager } from "@tanstack/react-query";
@@ -14,13 +14,14 @@ interface Item {
 }
 
 const CrudExample: React.FC = () => {
-  const [title, setTitle] = useState('');
-  const [desc, setDesc] = useState('');
+  const [title, setTitle] = useState<string>('');
+  const [desc, setDesc] = useState<string>('');
   const [updateId, setUpdateId] = useState<number | null>(null);
   const [refreshing, setRefreshing] = React.useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [isOnline, setIsOnline] = useState(onlineManager.isOnline());
 
+  const queryClient = useQueryClient()
   const { data, refetch } = useHandleApi();
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -30,25 +31,49 @@ const CrudExample: React.FC = () => {
   }, []);
 
 
-useEffect(() => {
-  return () => {
-    refetch()
-  };
-}, []);
-
   const reset = () => {
     console.log('reset');
-    refetch();
     setTitle('');
     setDesc('');
     setUpdateId(null);
   }
   const create = useMutation({
-    mutationFn: () => createItem(title, desc),
+    mutationKey: ['addPost'],
+    mutationFn: ({ title, desc }) => createItem(title, desc),
+    onMutate: ({ title, desc }) => {
+      let previousData: any[]  = queryClient.getQueryData(['fetchData']) ?? []
+      let oldData = [...previousData]
+      console.log("oldData", oldData)
+      if (oldData.length > 0) {
+        oldData.push({
+          id: new Date(),
+          title: title,
+          description: desc
+        })
+      } else {
+        oldData = [{
+          id: new Date(),
+          title: title,
+          description: desc
+        }]
+      }
+
+      queryClient.setQueryData(['fetchData'], oldData)
+
+      return { previousData }
+    },
     onSuccess: () => {
       reset();
       setModalVisible(false);
+      queryClient.invalidateQueries(['fetchData'])
+    },
+    onError: (error, variables, context ) => {
+      console.log('eeeeeee', error)
+      reset();
+      setModalVisible(false);
+      queryClient.setQueryData(['fetchData'], context?.previousData)
     }
+
   });
   const update = useMutation({
     mutationFn: () => updateItem(title, desc, updateId!),
@@ -63,9 +88,10 @@ useEffect(() => {
   });
 
   const addHandle = () => {
-    setModalVisible(true);
+    setModalVisible(false);
+    reset();
     if (title && desc) {
-      create.mutate();
+      create.mutate({title, desc});
     } else {
       console.error('Please fill required field');
     }
@@ -85,6 +111,9 @@ useEffect(() => {
   const updateHandle = () => {
     if (title && desc) {
       update.mutate();
+      reset();
+      refetch();
+      setModalVisible(false);
     } else {
       console.error('Please fill required field');
     }
@@ -93,6 +122,7 @@ useEffect(() => {
   const deleteHandle = (id: number) => {
     if (id) {
       deleteData.mutate(id);
+      refetch()
     } else {
       console.error('Something went wrong');
     }
@@ -138,25 +168,25 @@ useEffect(() => {
       <View style={styles.inputContainer}>
         <View style={styles.startButton}>
           {/* <Button title='Update' onPress={() => setModalVisible(true)} /> */}
-          <Text style={{ color: 'brown', fontSize: 30, textAlign: 'center',marginStart:15 }}>TODO List</Text>
+          <Text style={{ color: 'brown', fontSize: 30, textAlign: 'center', marginStart: 15 }}>TODO List</Text>
           <View>
             <Pressable
-            onPress={()=>{
-              onlineManager.setOnline(true);
-            setIsOnline(onlineManager.isOnline());
-            }}
+              onPress={() => {
+                onlineManager.setOnline(true);
+                setIsOnline(onlineManager.isOnline());
+              }}
             >
-              <MaterialIcons name='wifi' size={35} color="blue"/>
+              <MaterialIcons name='wifi' size={35} color="blue" />
             </Pressable>
           </View>
           <View>
             <Pressable
-            onPress={()=>{
-              onlineManager.setOnline(false);
-            setIsOnline(onlineManager.isOnline());
-            }}
+              onPress={() => {
+                onlineManager.setOnline(false);
+                setIsOnline(onlineManager.isOnline());
+              }}
             >
-              <MaterialIcons name='wifi-off' size={35} color="red"/>
+              <MaterialIcons name='wifi-off' size={35} color="red" />
             </Pressable>
           </View>
           <View
@@ -168,10 +198,10 @@ useEffect(() => {
               <MaterialIcons name='add' size={35} color="white" />
             </Pressable>
           </View>
-          
+
         </View>
         <View>
-        <Text style={styles.status}>Internet Status: {isOnline ? "ONLINE" : "OFFLINE"}</Text>
+          <Text style={styles.status}>Internet Status: {isOnline ? "ONLINE" : "OFFLINE"}</Text>
         </View>
         <FlatList
           style={{ height: '100%' }}
@@ -184,7 +214,7 @@ useEffect(() => {
           renderItem={renderItem}
           ListEmptyComponent={
             <View style={styles.centeredView}>
-              <Text style={{ marginTop: 50, fontSize: 30, color: 'red' }}>The list is empty</Text>
+              <Text style={{ marginTop: 50, fontSize: 30, color: 'grey' }}>The list is empty</Text>
               <Text style={{ marginTop: 20, fontSize: 20, color: 'blue' }}>Try to add Something</Text>
             </View>
           }
