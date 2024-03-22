@@ -9,6 +9,7 @@ import InputModal from '../components/InputModal';
 import Header from '../components/Header';
 import { useAddItem } from '../hook/useAddItem';
 import { useUpdateItem } from '../hook/useUpdateItem';
+import { useDeleteItem } from '../hook/useDeleteItem';
 
 
 
@@ -26,7 +27,7 @@ const CrudExample: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [isOnline, setIsOnline] = useState(onlineManager.isOnline());
 
-  const queryClient = useQueryClient()
+  // const queryClient = useQueryClient()
   const { data, refetch } = useHandleApi();
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -68,7 +69,7 @@ const CrudExample: React.FC = () => {
   };
 
   const { updateItemData } = useUpdateItem();
-
+  
   const updateHandle = () => {
     if (title && desc && updateId) {
       updateItemData({ title, desc, id: updateId });
@@ -78,22 +79,24 @@ const CrudExample: React.FC = () => {
       console.error('Please fill required fields');
     }
   };
-
-// For Delete todo
+  
+  // For Delete todo
+  const { deleteItemData } = useDeleteItem();
 
   const deleteHandle = (id: number) => {
     if (id) {
-      deleteData.mutate(id);
-      refetch()
+   deleteItemData({id});
+      // refetch()
     } else {
       console.error('Something went wrong');
+      alert('Item is not exist')
     }
   };
 
-  const deleteData = useMutation({
-    mutationFn: (id: number) => deleteItem(id),
-    onSuccess: () => reset(),
-  });
+  // const deleteData = useMutation({
+  //   mutationFn: (id: number) => deleteItem(id),
+  //   onSuccess: () => reset(),
+  // });
 
   return (
     <>

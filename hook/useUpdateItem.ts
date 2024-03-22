@@ -14,28 +14,34 @@ export const useUpdateItem = () => {
   const update = useMutation({
     mutationKey: ['updatePost'],
     mutationFn: ({ title, desc, id }: UpdateItemProps) => updateItem(title, desc, id),
-    onMutate: ({ title, desc }) => {
+    onMutate: ({ title, desc, id }) => {
       let previousData: any[] = queryClient.getQueryData(['fetchData']) ?? [];
-      let oldData = [...previousData];
-      console.log("oldData", oldData);
-      if (oldData.length > 0) {
-        oldData.push({
-          id: new Date(),
+      let updatedData = [...previousData];
+      console.log("oldData", updatedData);
+    
+      // Find the index of the item with the specified id
+      const index = updatedData.findIndex(item => item.id === id);
+    console.log("Current index",index);
+    console.log("Current id",id);
+
+    
+      if (index !== -1) {
+        // Update the existing item
+        updatedData[index] = {
+          ...updatedData[index],
           title: title,
           description: desc,
-        });
-      } else {
-        oldData = [{
-          id: new Date(),
-          title: title,
-          description: desc,
-        }];
+        };
       }
-
-      queryClient.setQueryData(['fetchData'], oldData);
-
+       else {
+       console.log("Item does not exist");
+      }
+    
+      queryClient.setQueryData(['fetchData'], updatedData);
+    
       return { previousData };
     },
+    
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fetchData'] });
     },

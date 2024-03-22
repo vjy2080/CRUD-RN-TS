@@ -12,7 +12,7 @@ const Header = ({isOnline,setIsOnline,setModalVisible}:any) => {
           <Text style={styles.logo}>TODO's</Text>
         <View>
           <Text style={styles.statusText}> Status </Text>
-          <Text style={styles.status}> {!isOnline ? "ONLINE" : "OFFLINE"}</Text>
+          <Text style={styles.status}> {isOnline ?  "OFFLINE" : "ONLINE"}</Text>
         </View>
 
           <View style={styles.InternetButton}>
