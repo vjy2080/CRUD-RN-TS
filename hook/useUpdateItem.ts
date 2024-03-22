@@ -1,17 +1,19 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createItem } from '../query/ReactQuery';
+import { updateItem } from '../query/ReactQuery';
 
-interface AddItemProps {
+interface UpdateItemProps {
   title: string;
   desc: string;
+  id: number;
+  previousData?: any[];
 }
 
-export const useAddItem = () => {
+export const useUpdateItem = () => {
   const queryClient = useQueryClient();
 
-  const create = useMutation({
-    mutationKey: ['addPost'],
-    mutationFn: ({ title, desc }: AddItemProps) => createItem(title, desc),
+  const update = useMutation({
+    mutationKey: ['updatePost'],
+    mutationFn: ({ title, desc, id }: UpdateItemProps) => updateItem(title, desc, id),
     onMutate: ({ title, desc }) => {
       let previousData: any[] = queryClient.getQueryData(['fetchData']) ?? [];
       let oldData = [...previousData];
@@ -37,19 +39,19 @@ export const useAddItem = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['fetchData'] });
     },
-    onError: (error, variables, context) => {
-      console.log('Error', error);
+    onError: (error,context) => {
+      console.error('Error updating item:', error);
       queryClient.setQueryData(['fetchData'], context?.previousData);
     },
   });
 
-  const addItem = ({ title, desc }: AddItemProps) => {
+  const updateItemData = ({ title, desc, id }: UpdateItemProps) => {
     if (title && desc) {
-      create.mutate({ title, desc });
+      update.mutate({ title, desc, id });
     } else {
-      console.error('Please fill required field');
+      console.error('Please fill required fields');
     }
   };
 
-  return { addItem };
+  return { updateItemData };
 };

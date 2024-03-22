@@ -9,25 +9,25 @@ import { MaterialIcons } from '@expo/vector-icons';
 const Header = ({isOnline,setIsOnline,setModalVisible}:any) => {
   return (
     <View style={styles.startButton}>
-          <Text style={{ color: 'brown', fontSize: 30, textAlign: 'center', marginStart: 15 }}>TODO List</Text>
+          <Text style={styles.logo}>TODO's</Text>
         <View>
           <Text style={styles.statusText}> Status </Text>
-          <Text style={styles.status}> {isOnline ? "ONLINE" : "OFFLINE"}</Text>
+          <Text style={styles.status}> {!isOnline ? "ONLINE" : "OFFLINE"}</Text>
         </View>
 
           <View style={styles.InternetButton}>
             <Pressable
               onPress={
                  isOnline ?
-                () => {onlineManager.setOnline(true);setIsOnline(!isOnline)}
-                :
-                () => {onlineManager.setOnline(false);setIsOnline(!isOnline)}
+                 () => {onlineManager.setOnline(true);setIsOnline(!isOnline)}
+                 :
+                 () => {onlineManager.setOnline(false);setIsOnline(!isOnline)}
             }
             >
            { isOnline ?
-              <MaterialIcons name='wifi' size={30} color="blue" />
-              :
               <MaterialIcons name='wifi-off' size={30} color="red" />
+              :
+              <MaterialIcons name='wifi' size={30} color="blue" />
            }
             </Pressable>
           </View>

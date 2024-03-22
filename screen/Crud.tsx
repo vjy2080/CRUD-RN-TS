@@ -8,6 +8,7 @@ import TodoCard from '../components/TodoCard';
 import InputModal from '../components/InputModal';
 import Header from '../components/Header';
 import { useAddItem } from '../hook/useAddItem';
+import { useUpdateItem } from '../hook/useUpdateItem';
 
 
 
@@ -42,7 +43,10 @@ const CrudExample: React.FC = () => {
     setUpdateId(null);
   }
 
-  const { addItem, isLoading } = useAddItem();
+  // For Create a new todo
+
+  const { addItem } = useAddItem();
+  // const { updateItem, isLoading } = useUpdateItem();
 
   const addHandle = () => {
     setModalVisible(false);
@@ -50,66 +54,7 @@ const CrudExample: React.FC = () => {
     addItem({ title, desc });
   };
 
-  // const create = useMutation({
-  //   mutationKey: ['addPost'],
-  //   mutationFn: ({ title, desc }:any) => createItem(title, desc),
-  //   onMutate: ({ title, desc }) => {
-  //     let previousData: any[] = queryClient.getQueryData(['fetchData']) ?? []
-  //     let oldData = [...previousData]
-  //     console.log("oldData", oldData)
-  //     if (oldData.length > 0) {
-  //       oldData.push({
-  //         id: new Date(),
-  //         title: title,
-  //         description: desc
-  //       })
-  //     } else {
-  //       oldData = [{
-  //         id: new Date(),
-  //         title: title,
-  //         description: desc
-  //       }]
-  //     }
-
-  //     queryClient.setQueryData(['fetchData'], oldData)
-
-  //     return { previousData }
-  //   },
-  //   onSuccess: () => {
-  //     reset();
-  //     setModalVisible(false);
-  //     queryClient.invalidateQueries({queryKey: ['fetchData']})
-  //   },
-  //   onError: (error, variables, context) => {
-  //     console.log('eeeeeee', error)
-  //     reset();
-  //     setModalVisible(false);
-  //     queryClient.setQueryData(['fetchData'], context?.previousData)
-  //   }
-
-  // });
-  const update = useMutation({
-    mutationFn: () => updateItem(title, desc, updateId!),
-    onSuccess: () => {
-      reset();
-      refetch();
-      setModalVisible(false);
-    }
-  });
-  const deleteData = useMutation({
-    mutationFn: (id: number) => deleteItem(id),
-    onSuccess: () => reset(),
-  });
-
-  // const addHandle = () => {
-  //   setModalVisible(false);
-  //   reset();
-  //   if (title && desc) {
-  //     create.mutate({ title, desc });
-  //   } else {
-  //     console.error('Please fill required field');
-  //   }
-  // };
+  // For Update an existing todo
 
   const editHandle = (id: number) => {
     const selectedItem = data?.find((item: Item) => item.id === id);
@@ -122,16 +67,19 @@ const CrudExample: React.FC = () => {
     }
   };
 
+  const { updateItemData } = useUpdateItem();
+
   const updateHandle = () => {
-    if (title && desc) {
-      update.mutate();
+    if (title && desc && updateId) {
+      updateItemData({ title, desc, id: updateId });
       reset();
-      refetch();
       setModalVisible(false);
     } else {
-      console.error('Please fill required field');
+      console.error('Please fill required fields');
     }
   };
+
+// For Delete todo
 
   const deleteHandle = (id: number) => {
     if (id) {
@@ -142,9 +90,10 @@ const CrudExample: React.FC = () => {
     }
   };
 
-  const renderItem = ({ item }: any) => (
-    <TodoCard item={item} editHandle={editHandle} deleteHandle={deleteHandle} />
-  );
+  const deleteData = useMutation({
+    mutationFn: (id: number) => deleteItem(id),
+    onSuccess: () => reset(),
+  });
 
   return (
     <>
@@ -162,7 +111,11 @@ const CrudExample: React.FC = () => {
           }
           data={data}
           keyExtractor={(item: any) => item?.id}
-          renderItem={renderItem}
+          renderItem={
+            ({ item }: any) => (
+              <TodoCard item={item} editHandle={editHandle} deleteHandle={deleteHandle} />
+            )
+          }
           ListEmptyComponent={
             <View style={styles.centeredView}>
               <Text style={{ marginTop: 50, fontSize: 30, color: 'grey' }}>The list is empty</Text>

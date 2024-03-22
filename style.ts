@@ -1,6 +1,12 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
+    logo: {
+        color: 'navy',
+        fontSize: 30,
+        textAlign: 'center',
+        marginStart: 15
+    },
     card: {
         flexDirection: 'row',
         backgroundColor: '#d3d3d3',
@@ -98,7 +104,7 @@ export const styles = StyleSheet.create({
         // width: 105,
         borderColor: 'black',
         paddingHorizontal: 10,
-        paddingVertical:5,
+        paddingVertical: 5,
         marginHorizontal: 5,
         borderRadius: 5,
         marginBottom: 10,
@@ -109,7 +115,7 @@ export const styles = StyleSheet.create({
         // width: 205,
         borderColor: 'black',
         paddingHorizontal: 10,
-        paddingVertical:5,
+        paddingVertical: 5,
         marginHorizontal: 5,
         borderRadius: 5,
         marginBottom: 10,
@@ -120,20 +126,20 @@ export const styles = StyleSheet.create({
         padding: 5,
         borderRadius: 50,
     },
-    status:{
-        textAlign:'center',
+    status: {
+        textAlign: 'center',
         // marginRight:10,
         // color:'green',
-        fontSize:10,
+        fontSize: 10,
     },
-    statusText:{
-        textAlign:'center',
+    statusText: {
+        textAlign: 'center',
         // marginRight:10,
-        color:'blue',
-        fontSize:10,
+        color: 'blue',
+        fontSize: 10,
     },
-    InternetButton:{
-        alignItems:'center'
+    InternetButton: {
+        alignItems: 'center'
     },
 
 })
