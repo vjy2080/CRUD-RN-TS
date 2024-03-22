@@ -7,6 +7,8 @@ import { onlineManager } from "@tanstack/react-query";
 import TodoCard from '../components/TodoCard';
 import InputModal from '../components/InputModal';
 import Header from '../components/Header';
+import { useAddItem } from '../hook/useAddItem';
+
 
 
 interface Item {
@@ -39,44 +41,53 @@ const CrudExample: React.FC = () => {
     setDesc('');
     setUpdateId(null);
   }
-  const create = useMutation({
-    mutationKey: ['addPost'],
-    mutationFn: ({ title, desc }:any) => createItem(title, desc),
-    onMutate: ({ title, desc }) => {
-      let previousData: any[] = queryClient.getQueryData(['fetchData']) ?? []
-      let oldData = [...previousData]
-      console.log("oldData", oldData)
-      if (oldData.length > 0) {
-        oldData.push({
-          id: new Date(),
-          title: title,
-          description: desc
-        })
-      } else {
-        oldData = [{
-          id: new Date(),
-          title: title,
-          description: desc
-        }]
-      }
 
-      queryClient.setQueryData(['fetchData'], oldData)
+  const { addItem, isLoading } = useAddItem();
 
-      return { previousData }
-    },
-    onSuccess: () => {
-      reset();
-      setModalVisible(false);
-      queryClient.invalidateQueries({queryKey: ['fetchData']})
-    },
-    onError: (error, variables, context) => {
-      console.log('eeeeeee', error)
-      reset();
-      setModalVisible(false);
-      queryClient.setQueryData(['fetchData'], context?.previousData)
-    }
+  const addHandle = () => {
+    setModalVisible(false);
+    reset();
+    addItem({ title, desc });
+  };
 
-  });
+  // const create = useMutation({
+  //   mutationKey: ['addPost'],
+  //   mutationFn: ({ title, desc }:any) => createItem(title, desc),
+  //   onMutate: ({ title, desc }) => {
+  //     let previousData: any[] = queryClient.getQueryData(['fetchData']) ?? []
+  //     let oldData = [...previousData]
+  //     console.log("oldData", oldData)
+  //     if (oldData.length > 0) {
+  //       oldData.push({
+  //         id: new Date(),
+  //         title: title,
+  //         description: desc
+  //       })
+  //     } else {
+  //       oldData = [{
+  //         id: new Date(),
+  //         title: title,
+  //         description: desc
+  //       }]
+  //     }
+
+  //     queryClient.setQueryData(['fetchData'], oldData)
+
+  //     return { previousData }
+  //   },
+  //   onSuccess: () => {
+  //     reset();
+  //     setModalVisible(false);
+  //     queryClient.invalidateQueries({queryKey: ['fetchData']})
+  //   },
+  //   onError: (error, variables, context) => {
+  //     console.log('eeeeeee', error)
+  //     reset();
+  //     setModalVisible(false);
+  //     queryClient.setQueryData(['fetchData'], context?.previousData)
+  //   }
+
+  // });
   const update = useMutation({
     mutationFn: () => updateItem(title, desc, updateId!),
     onSuccess: () => {
@@ -90,15 +101,15 @@ const CrudExample: React.FC = () => {
     onSuccess: () => reset(),
   });
 
-  const addHandle = () => {
-    setModalVisible(false);
-    reset();
-    if (title && desc) {
-      create.mutate({ title, desc });
-    } else {
-      console.error('Please fill required field');
-    }
-  };
+  // const addHandle = () => {
+  //   setModalVisible(false);
+  //   reset();
+  //   if (title && desc) {
+  //     create.mutate({ title, desc });
+  //   } else {
+  //     console.error('Please fill required field');
+  //   }
+  // };
 
   const editHandle = (id: number) => {
     const selectedItem = data?.find((item: Item) => item.id === id);
@@ -139,12 +150,10 @@ const CrudExample: React.FC = () => {
     <>
       <View style={styles.inputContainer}>
         <Header
+        isOnline={isOnline}
           setIsOnline={setIsOnline}
           setModalVisible={setModalVisible}
         />
-        <View>
-          <Text style={styles.status}>Internet Status: {isOnline ? "ONLINE" : "OFFLINE"}</Text>
-        </View>
         <FlatList
           style={{ height: '100%' }}
           showsVerticalScrollIndicator={false}

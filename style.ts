@@ -121,9 +121,19 @@ export const styles = StyleSheet.create({
         borderRadius: 50,
     },
     status:{
-        textAlign:'right',
-        marginRight:10,
-        color:'grey'
-    }
+        textAlign:'center',
+        // marginRight:10,
+        // color:'green',
+        fontSize:10,
+    },
+    statusText:{
+        textAlign:'center',
+        // marginRight:10,
+        color:'blue',
+        fontSize:10,
+    },
+    InternetButton:{
+        alignItems:'center'
+    },
 
 })
