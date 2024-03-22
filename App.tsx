@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import CrudExample from './Crud';
+import CrudExample from './screen/Crud';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 export default function App() {
