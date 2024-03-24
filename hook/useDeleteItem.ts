@@ -12,31 +12,28 @@ export const useDeleteItem = () => {
     const deleteTodo = useMutation({
         mutationKey: ['updatePost'],
         mutationFn: ({ id }: DeleteItemProps) => deleteItem(id),
-        // onMutate: ({ title, desc }) => {
-        //   let previousData: any[] = queryClient.getQueryData(['fetchData']) ?? [];
-        //   let oldData = [...previousData];
-        //   console.log("oldData", oldData);
-        //   if (oldData.length > 0) {
-        //     oldData.push({
-        //       id: new Date(),
-        //       title: title,
-        //       description: desc,
-        //     });
-        //   } else {
-        //     oldData = [{
-        //       id: new Date(),
-        //       title: title,
-        //       description: desc,
-        //     }];
-        //   }
+        onMutate: (data) => {
+            queryClient.cancelQueries({queryKey: ['fetchData']})
+            let previousData: any[] = queryClient.getQueryData(['fetchData']) ?? [];
+            let oldData = [...previousData];
+            console.log("oldData", oldData);
+            console.log("id to be delated", data);
+            
+            // Filter out the item with the specified id
+            let updatedData = oldData.filter(item => item.id !== data.id);
 
-        //   queryClient.setQueryData(['fetchData'], oldData);
-
-        //   return { previousData };
-        // },
-        onSuccess: () => {
+            
+            console.log("updatedData", updatedData.length);
+          
+            queryClient.setQueryData(['fetchData'], updatedData);
+          
+            return { previousData };
+          },
+          onSuccess: () => {
+          
             queryClient.invalidateQueries({ queryKey: ['fetchData'] });
-        },
+          },
+
         onError: (error, context) => {
             console.error('Error updating item:', error);
             queryClient.setQueryData(['fetchData'], context?.previousData);
