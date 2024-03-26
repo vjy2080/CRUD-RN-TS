@@ -20,16 +20,16 @@ export const useHandleApi = () => {
   });
 };
 
-export const createItem = async (title: string, desc: string): Promise<Post> => {
+export const createItem = async (data:Post): Promise<Post> => {
   console.log('create press');
-  const response = await axios.post(baseUrl, { title, description: desc });
+  const response = await axios.post(baseUrl,  data );
   return response.data;
 };
 
-export const updateItem = async (title: string, desc: string, id: number): Promise<Post> => {
+export const updateItem = async (title: string, description: string, id: number): Promise<Post> => {
   console.log('update press');
 
-  const response = await axios.put(`${baseUrl}/${id}`, { title, description: desc });
+  const response = await axios.put(`${baseUrl}/${id}`, { title, description: description });
   return response.data;
 };
 

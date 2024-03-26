@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, RefreshControl, } from 'react-native';
-import { useHandleApi, createItem, updateItem, deleteItem } from '../query/ReactQuery';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useHandleApi} from '../query/ReactQuery';
 import { styles } from '../style';
 import { onlineManager } from "@tanstack/react-query";
 import TodoCard from '../components/TodoCard';
@@ -11,8 +10,6 @@ import { useAddItem } from '../hook/useAddItem';
 import { useUpdateItem } from '../hook/useUpdateItem';
 import { useDeleteItem } from '../hook/useDeleteItem';
 
-
-
 interface Item {
   id: number;
   title: string;
@@ -20,14 +17,14 @@ interface Item {
 }
 
 const CrudExample: React.FC = () => {
-  const [title, setTitle] = useState<string>('');
-  const [desc, setDesc] = useState<string>('');
+  // const [title, setTitle] = useState<string>('');
+  // const [description, setDesc] = useState<string>('');
   const [updateId, setUpdateId] = useState<number | null>(null);
   const [refreshing, setRefreshing] = React.useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [isOnline, setIsOnline] = useState(onlineManager.isOnline());
 
-  // const queryClient = useQueryClient()
+  
   const { data, refetch } = useHandleApi();
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
@@ -39,20 +36,19 @@ const CrudExample: React.FC = () => {
 
   const reset = () => {
     console.log('reset');
-    setTitle('');
-    setDesc('');
+    // setTitle('');
+    // setDesc('');
     setUpdateId(null);
   }
 
   // For Create a new todo
 
   const { addItem } = useAddItem();
-  // const { updateItem, isLoading } = useUpdateItem();
 
-  const addHandle = () => {
+  const addHandle = (data) => {
     setModalVisible(false);
     reset();
-    addItem({ title, desc });
+    addItem(data);
   };
 
   // For Update an existing todo
@@ -60,8 +56,8 @@ const CrudExample: React.FC = () => {
   const editHandle = (id: number) => {
     const selectedItem = data?.find((item: Item) => item.id === id);
     if (selectedItem) {
-      setTitle(selectedItem.title);
-      setDesc(selectedItem.description);
+      // setTitle(selectedItem.title);
+      // setDesc(selectedItem.description);
       setUpdateId(id);
       setModalVisible(true);
       console.log(id);
@@ -71,8 +67,8 @@ const CrudExample: React.FC = () => {
   const { updateItemData } = useUpdateItem();
   
   const updateHandle = () => {
-    if (title && desc && updateId) {
-      updateItemData({ title, desc, id: updateId });
+    if (title && description && updateId) {
+      updateItemData({ title, description, id: updateId });
       reset();
       setModalVisible(false);
     } else {
@@ -86,18 +82,11 @@ const CrudExample: React.FC = () => {
   const deleteHandle = (id: number) => {
     if (id) {
    deleteItemData({id});
-      // refetch()
     } else {
       console.error('Something went wrong');
-      alert('Item is not exist')
     }
   };
-
-  // const deleteData = useMutation({
-  //   mutationFn: (id: number) => deleteItem(id),
-  //   onSuccess: () => reset(),
-  // });
-
+ 
   return (
     <>
       <View style={styles.inputContainer}>
@@ -129,10 +118,10 @@ const CrudExample: React.FC = () => {
         <View style={styles.centeredView}>
           <InputModal
             modalVisible={modalVisible}
-            title={title}
-            setTitle={setTitle}
-            desc={desc}
-            setDesc={setDesc}
+            // title={title}
+            // setTitle={setTitle}
+            // description={description}
+            // setDesc={setDesc}
             setModalVisible={setModalVisible}
             reset={reset}
             updateId={updateId}

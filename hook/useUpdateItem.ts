@@ -3,7 +3,7 @@ import { updateItem } from '../query/ReactQuery';
 
 interface UpdateItemProps {
   title: string;
-  desc: string;
+  description: string;
   id: number;
   previousData?: any[];
 }
@@ -13,8 +13,8 @@ export const useUpdateItem = () => {
 
   const update = useMutation({
     mutationKey: ['updatePost'],
-    mutationFn: ({ title, desc, id }: UpdateItemProps) => updateItem(title, desc, id),
-    onMutate: ({ title, desc, id }) => {
+    mutationFn: ({ title, description, id }: UpdateItemProps) => updateItem(title, description, id),
+    onMutate: ({ title, description, id }) => {
       let previousData: any[] = queryClient.getQueryData(['fetchData']) ?? [];
       let updatedData = [...previousData];
       console.log("oldData", updatedData);
@@ -30,7 +30,7 @@ export const useUpdateItem = () => {
         updatedData[index] = {
           ...updatedData[index],
           title: title,
-          description: desc,
+          description: description,
         };
       }
        else {
@@ -51,9 +51,9 @@ export const useUpdateItem = () => {
     },
   });
 
-  const updateItemData = ({ title, desc, id }: UpdateItemProps) => {
-    if (title && desc) {
-      update.mutate({ title, desc, id });
+  const updateItemData = ({ title, description, id }: UpdateItemProps) => {
+    if (title && description) {
+      update.mutate({ title, description, id });
     } else {
       console.error('Please fill required fields');
     }

@@ -16,6 +16,7 @@
     "expo-status-bar": "~1.11.1",
     "json-server": "^1.0.0-alpha.21",
     "react": "18.2.0",
+    "react-hook-form": "^7.51.1",
     "react-native": "0.73.2"
   },
   "devDependencies": {

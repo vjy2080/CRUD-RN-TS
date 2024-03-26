@@ -14,7 +14,7 @@ const TodoCard = ({item,editHandle,deleteHandle}:any) => {
         <Text
           style={styles.cardText}
         >{item.title}</Text>
-        <Text style={styles.headerText}>Desc:</Text>
+        <Text style={styles.headerText}>description:</Text>
 
         <Text
           style={styles.cardText}

@@ -3,7 +3,7 @@ import { createItem } from '../query/ReactQuery';
 
 interface AddItemProps {
   title: string;
-  desc: string;
+  description: string;
 }
 
 export const useAddItem = () => {
@@ -11,23 +11,15 @@ export const useAddItem = () => {
 
   const create = useMutation({
     mutationKey: ['addPost'],
-    mutationFn: ({ title, desc }: AddItemProps) => createItem(title, desc),
-    onMutate: ({ title, desc }) => {
+    mutationFn: (data: AddItemProps) => createItem(data),
+    onMutate: (data) => {
       let previousData: any[] = queryClient.getQueryData(['fetchData']) ?? [];
       let oldData = [...previousData];
       console.log("oldData", oldData);
       if (oldData.length > 0) {
-        oldData.push({
-          id: new Date(),
-          title: title,
-          description: desc,
-        });
+        oldData.push(data);
       } else {
-        oldData = [{
-          id: new Date(),
-          title: title,
-          description: desc,
-        }];
+        oldData = [data];
       }
 
       queryClient.setQueryData(['fetchData'], oldData);
@@ -43,9 +35,9 @@ export const useAddItem = () => {
     },
   });
 
-  const addItem = ({ title, desc }: AddItemProps) => {
-    if (title && desc) {
-      create.mutate({ title, desc });
+  const addItem = ( data : AddItemProps) => {
+    if (data) {
+      create.mutate( data );
     } else {
       console.error('Please fill required field');
     }
